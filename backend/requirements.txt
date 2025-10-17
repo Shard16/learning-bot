@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+sqlalchemy
+alembic
+celery[redis]
+redis
+python-telegram-bot
+httpx
+python-dotenv
+pytest
