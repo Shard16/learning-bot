@@ -29,6 +29,41 @@ def handle_response(text: str) -> str:
         return "I'm sorry, I didn't understand that."
     
 
+async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message = update.message
+    chat_id = message.chat_id
+
+    if message.document:
+        file = message.document
+        mime_type = file.mime_type
+        file_name = file.file_name
+        
+        print(f"Received document: {file_name} ({mime_type})")
+        
+        if mime_type == 'application/pdf':
+            await message.reply_text("Processing your PDF document...")
+            # Add PDF processing logic here
+        elif mime_type.startswith('text/'):
+            await message.reply_text("Processing your text document...")
+            # Add text file processing logic here
+        else:
+            await message.reply_text("Sorry, I can only process PDF and text documents at the moment.")
+            
+    elif message.photo:
+        photo = message.photo[-1]  # Get the largest photo size
+        print(f"Received photo with file_id: {photo.file_id}")
+        await message.reply_text("Processing your image...")
+        # Add image processing logic here
+        
+    elif message.voice or message.audio:
+        file = message.voice or message.audio
+        print(f"Received audio file with file_id: {file.file_id}")
+        await message.reply_text("Processing your audio file...")
+        # Add audio processing logic here
+        
+    else:
+        await message.reply_text("Sorry, I don't recognize this type of file.")
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type = update.message.chat.type
     text: str = update.message.text
@@ -57,6 +92,15 @@ if __name__ == "__main__":
 
     #messages
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    
+    #files
+    app.add_handler(MessageHandler(
+        filters.PHOTO | 
+        filters.AUDIO | 
+        filters.VOICE | 
+        filters.Document.ALL, 
+        handle_file
+    ))
 
     #errors
     app.add_error_handler(error_handler)
